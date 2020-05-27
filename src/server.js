@@ -23,9 +23,10 @@ const oAuth2Strategy = new OAuth2Strategy(
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: 'http://ip-10-119-0-167:3000/callback'
   },
-  (accessToken, refreshToken, extraParams, profile, done) => {
-    profile.idToken = extraParams.id_token;
-    return done(null, profile);
+  (accessToken, refreshToken, profile, done) => {
+    User.findOrCreate({ exampleId: profile.id }, function(err, user) {
+      return done(err, user);
+    });
   }
 );
 passport.use(oAuth2Strategy);
