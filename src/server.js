@@ -8,6 +8,7 @@ const passport = require('passport');
 const OAuth2Strategy = require('passport-oauth2');
 const request = require('request-promise');
 const session = require('express-session');
+const jwt = require('jsonwebtoken');
 
 // loading env vars from .env file
 require('dotenv').config();
@@ -17,16 +18,19 @@ const app = express();
 //Configure Passport to use OAuth2Strategy
 const oAuth2Strategy = new OAuth2Strategy(
   {
+    state: true,
     authorizationURL: process.env.AUTHORIZATION_URL,
     tokenURL: process.env.TOKEN_URL,
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: 'http://ip-10-119-0-167:3000/callback'
+    callbackURL: 'http://ip-10-119-0-167:3000/callback',
+    passReqToCallback: true
   },
-  (accessToken, refreshToken, profile, done) => {
-    User.findOrCreate({ exampleId: profile.id }, function(err, user) {
-      return done(err, user);
-    });
+  (accessToken, refreshToken, extraParams, profile, done) => {
+    profile.idToken = extraParams.id_token;
+    console.log(profile);
+    console.log(extraParams.id_token);
+    return done(null, profile);
   }
 );
 passport.use(oAuth2Strategy);
