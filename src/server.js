@@ -8,7 +8,6 @@ const passport = require('passport');
 const OAuth2Strategy = require('passport-oauth2');
 const request = require('request-promise');
 const session = require('express-session');
-const jwt = require('jsonwebtoken');
 
 // loading env vars from .env file
 require('dotenv').config();
