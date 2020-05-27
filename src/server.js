@@ -26,9 +26,12 @@ const oAuth2Strategy = new OAuth2Strategy(
     passReqToCallback: true
   },
   (accessToken, refreshToken, extraParams, profile, done) => {
-    profile.idToken = extraParams.id_token;
+    console.log(accessToken);
+    console.log(refreshToken);
+    console.log(extraParams);
     console.log(profile);
     console.log(extraParams.id_token);
+    profile.idToken = extraParams.id_token;
     return done(null, profile);
   }
 );
