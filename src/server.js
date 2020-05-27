@@ -14,6 +14,22 @@ require('dotenv').config();
 
 const app = express();
 
+//Configure Passport to use Auth0
+const auth0Strategy = new Auth0Strategy(
+{
+  domain: process.env.OIDC_PROVIDER,
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: 'http:// localhost:3000/callback'
+},
+(accessToken, refreshToken, extraParams, profile, done) => {
+  profile.idToken = extraParams.id_token;
+  return done(null, profile);
+}
+);
+passport.use(auth0Strategy);
+//
+
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 app.use(passport.initialize());
