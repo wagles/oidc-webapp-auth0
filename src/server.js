@@ -5,7 +5,7 @@ const express = require('express');
 const handlebars = require('express-handlebars');
 const path = require('path');
 const passport = require('passport');
-const Auth0Strategy = require('passport-auth0');
+const OAuth2Strategy = require('passport-oauth2');
 const request = require('request-promise');
 const session = require('express-session');
 
@@ -14,20 +14,21 @@ require('dotenv').config();
 
 const app = express();
 
-//Configure Passport to use Auth0
-const auth0Strategy = new Auth0Strategy(
-{
-  domain: process.env.OIDC_PROVIDER,
-  clientID: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: 'http://ip-10-119-0-167:3000/callback'
-},
-(accessToken, refreshToken, extraParams, profile, done) => {
-  profile.idToken = extraParams.id_token;
-  return done(null, profile);
-}
+//Configure Passport to use OAuth2Strategy
+const oAuth2Strategy = new OAuth2Strategy(
+  {
+    authorizationURL: process.env.AUTHORIZATION_URL,
+    tokenURL: process.env.TOKEN_URL,
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: 'http://ip-10-119-0-167:3000/callback'
+  },
+  (accessToken, refreshToken, extraParams, profile, done) => {
+    profile.idToken = extraParams.id_token;
+    return done(null, profile);
+  }
 );
-passport.use(auth0Strategy);
+passport.use(oAuth2Strategy);
 //
 
 passport.serializeUser((user, done) => done(null, user));
@@ -65,9 +66,9 @@ app.get('/profile', (req, res) => {
 
 app.get(
   '/login',
-  passport.authenticate('auth0', {
+  passport.authenticate('oauth2', {
     scope: 'openid email profile'
-  }),
+  })
 );
 
 //app.post('/callback', async (req, res) => {
@@ -75,7 +76,7 @@ app.get(
 //});
 
 app.get('/callback', (req, res, next) => {
-  passport.authenticate('auth0', (err, user) => {
+  passport.authenticate('oauth2', (err, user) => {
     if (err) return next(err);
     if (!user) return res.redirect('/login');
     req.logIn(user, function(err) {
